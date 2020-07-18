@@ -59,31 +59,37 @@ public class PlayerPickupObject : MonoBehaviour{
     // Update is called once per frame
     void Update()
     {
-        //Grab object
-        if (Input.GetKeyDown(KeyCode.F) && grabbedObject == null && Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance) && hit.transform.GetComponent<Rigidbody>() && hit.transform.GetComponent<Rigidbody>().mass <= maxObjectMass)
+        if (Time.timeScale > 0)
         {
-            Debug.Log("Grabbing object!");
-            GrabObject();
-        }
-        //Release grabbed object
-        else if (Input.GetKeyDown(KeyCode.F) && grabbedObject != null)
-        {
-            Debug.Log("Releasing object");
-            ReleaseObject();
-        }
-        //Throw grabbed object
-        else if (Input.GetMouseButtonDown(0) && grabbedObject != null)
-        {
-            Debug.Log("Throwing object!");
-            ThrowObject();
+            //Grab object
+            if (Input.GetKeyDown(KeyCode.F) && grabbedObject == null && Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance) && hit.transform.GetComponent<Rigidbody>() && hit.transform.GetComponent<Rigidbody>().mass <= maxObjectMass)
+            {
+                Debug.Log("Grabbing object!");
+                GrabObject();
+            }
+            //Release grabbed object
+            else if (Input.GetKeyDown(KeyCode.F) && grabbedObject != null)
+            {
+                Debug.Log("Releasing object");
+                ReleaseObject();
+            }
+            //Throw grabbed object
+            else if (Input.GetMouseButtonDown(0) && grabbedObject != null)
+            {
+                Debug.Log("Throwing object!");
+                ThrowObject();
+            }
         }
     }
 
     void FixedUpdate()
     {
-        if (grabbedObject != null)
+        if (Time.timeScale > 0)
         {
-            grabbedObject.GetComponent<Rigidbody>().velocity = (objectGrabPosition.position - grabbedObject.transform.GetComponent<Renderer>().bounds.center) * 10;
+            if (grabbedObject != null)
+            {
+                grabbedObject.GetComponent<Rigidbody>().velocity = (objectGrabPosition.position - grabbedObject.transform.GetComponent<Renderer>().bounds.center) * 10;
+            }
         }
     }
 }
