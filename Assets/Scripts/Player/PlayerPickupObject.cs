@@ -11,19 +11,79 @@ public class PlayerPickupObject : MonoBehaviour{
 
     private RaycastHit hit;
     private GameObject grabbedObject;
+    private bool didHit = false;
     private float originalObjectBounciness;
+    private float timeStartHoldingDownF;
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (Time.timeScale > 0)
+        {
+            if(Input.GetKeyDown(KeyCode.F) && grabbedObject != null){
+                Debug.Log("Releasing object");
+                ReleaseObject();
+            }
+            else if(Input.GetKeyDown(KeyCode.F)){
+                //Player starts holding down F key
+                timeStartHoldingDownF = Time.realtimeSinceStartup;
+                didHit = Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance);
+            }
+
+            float timeHeldDown = Time.realtimeSinceStartup - timeStartHoldingDownF;
+
+            if(Input.GetKeyUp(KeyCode.F)){
+              if(grabbedObject == null && timeHeldDown < 0.2f && didHit){
+                //Add object to inventory
+                transform.gameObject.GetComponent<Inventory>().PickUp(hit.transform.gameObject);
+              }
+
+              timeStartHoldingDownF = default;
+            }
+
+            if(timeStartHoldingDownF > 0 && timeHeldDown > 0.2f){
+                Debug.Log("Time held down F key: " + timeHeldDown);
+
+                if(didHit || Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance)){
+                  Debug.Log("Grabbing object!");
+                  GrabObject();
+                }
+
+                timeStartHoldingDownF = default;
+            }
+
+            if (Input.GetMouseButtonDown(2) && grabbedObject != null)
+            {
+                Debug.Log("Throwing object!");
+                ThrowObject();
+            }
+        }
+    }
+
+    void FixedUpdate()
+    {
+        if (Time.timeScale > 0)
+        {
+            if (grabbedObject != null)
+            {
+                grabbedObject.GetComponent<Rigidbody>().velocity = (objectGrabPosition.position - grabbedObject.transform.GetComponent<Renderer>().bounds.center) * 10;
+            }
+        }
+    }
 
     void GrabObject()
     {
-        grabbedObject = hit.transform.gameObject;
-        grabbedObject.GetComponent<Rigidbody>().freezeRotation = true;
+        if(hit.transform.gameObject.GetComponent<Rigidbody>()){
+          grabbedObject = hit.transform.gameObject;
+          grabbedObject.GetComponent<Rigidbody>().freezeRotation = true;
 
-        if (grabbedObject.GetComponent<Collider>())
-        {
-            originalObjectBounciness = grabbedObject.GetComponent<Collider>().material.bounciness;
+          if (grabbedObject.GetComponent<Collider>())
+          {
+              originalObjectBounciness = grabbedObject.GetComponent<Collider>().material.bounciness;
 
-            //Set the object bounciness to 0
-            SetObjectBounciness(0);
+              //Set the object bounciness to 0
+              SetObjectBounciness(0);
+          }
         }
     }
 
@@ -53,43 +113,6 @@ public class PlayerPickupObject : MonoBehaviour{
         if (grabbedObject.GetComponent<Collider>())
         {
             grabbedObject.GetComponent<Collider>().material.bounciness = bounciness;
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (Time.timeScale > 0)
-        {
-            //Grab object
-            if (Input.GetKeyDown(KeyCode.F) && grabbedObject == null && Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance) && hit.transform.GetComponent<Rigidbody>() && hit.transform.GetComponent<Rigidbody>().mass <= maxObjectMass)
-            {
-                Debug.Log("Grabbing object!");
-                GrabObject();
-            }
-            //Release grabbed object
-            else if (Input.GetKeyDown(KeyCode.F) && grabbedObject != null)
-            {
-                Debug.Log("Releasing object");
-                ReleaseObject();
-            }
-            //Throw grabbed object
-            else if (Input.GetMouseButtonDown(0) && grabbedObject != null)
-            {
-                Debug.Log("Throwing object!");
-                ThrowObject();
-            }
-        }
-    }
-
-    void FixedUpdate()
-    {
-        if (Time.timeScale > 0)
-        {
-            if (grabbedObject != null)
-            {
-                grabbedObject.GetComponent<Rigidbody>().velocity = (objectGrabPosition.position - grabbedObject.transform.GetComponent<Renderer>().bounds.center) * 10;
-            }
         }
     }
 }
