@@ -14,10 +14,19 @@ public class PlayerPickupObject : MonoBehaviour{
     private bool didHit = false;
     private float originalObjectBounciness;
     private float timeStartHoldingDownF;
+    private bool paused = false;
 
     // Update is called once per frame
     void Update()
     {
+        if(paused){
+          if(grabbedObject){
+            ReleaseObject();
+          }
+
+          return;
+        }
+
         if (Time.timeScale > 0)
         {
             if(Input.GetKeyDown(KeyCode.F) && grabbedObject != null){
@@ -114,5 +123,13 @@ public class PlayerPickupObject : MonoBehaviour{
         {
             grabbedObject.GetComponent<Collider>().material.bounciness = bounciness;
         }
+    }
+
+    public void Resume(){
+      paused = false;
+    }
+
+    public void Pause(){
+      paused = true;
     }
 }

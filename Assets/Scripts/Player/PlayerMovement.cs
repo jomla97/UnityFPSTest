@@ -18,6 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private float xRotation = 0f;
     private Vector3 velocity;
     private bool isGrounded;
+    private bool paused = false;
 
     // Start is called before the first frame update
     void Start()
@@ -38,32 +39,39 @@ public class PlayerMovement : MonoBehaviour
             }
 
             //Camera movement
-            float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-            float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+            if(!paused){
+              float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
+              float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
-            xRotation -= mouseY;
-            xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+              xRotation -= mouseY;
+              xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-            camera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-            transform.Rotate(Vector3.up * mouseX);
-
-            //Walking & running
-            float movementSpeed = walkSpeed;
-
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                movementSpeed = runSpeed;
+              camera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+              transform.Rotate(Vector3.up * mouseX);
             }
 
-            float x = Input.GetAxis("Horizontal");
-            float z = Input.GetAxis("Vertical");
+            //Walking & running
+            float x = 0;
+            float z = 0;
+            float movementSpeed = walkSpeed;
+
+            if(!paused){
+
+              if (Input.GetKey(KeyCode.LeftShift))
+              {
+                  movementSpeed = runSpeed;
+              }
+
+              x = Input.GetAxis("Horizontal");
+              z = Input.GetAxis("Vertical");
+            }
 
             Vector3 move = transform.right * x + transform.forward * z;
 
             controller.Move(move * movementSpeed * Time.deltaTime);
 
             //Jump
-            if (Input.GetButtonDown("Jump") && isGrounded)
+            if (Input.GetButtonDown("Jump") && isGrounded && !paused)
             {
                 velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
@@ -73,5 +81,13 @@ public class PlayerMovement : MonoBehaviour
 
             controller.Move(velocity * Time.deltaTime);
         }
+    }
+
+    public void Resume(){
+      paused = false;
+    }
+
+    public void Pause(){
+      paused = true;
     }
 }

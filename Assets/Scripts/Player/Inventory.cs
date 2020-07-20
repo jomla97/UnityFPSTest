@@ -5,14 +5,39 @@ using UnityEngine;
 public class Inventory : MonoBehaviour
 {
     public Transform activeItemPosition;
+    public GameObject inventoryUI;
+    public GameObject hud;
     public List<GameObject> gameObjects = new List<GameObject>();
     public int activeItemIndex = 0;
     public float dropForce = 10f;
     public float throwForce = 50f;
 
     private float timeStartHoldingDownF;
+    private bool visible = false;
 
     void Update(){
+      //Show/hide inventory
+      if(Input.GetKeyDown(KeyCode.Tab)){
+        if(visible){
+          //Hide
+          inventoryUI.SetActive(false);
+          hud.SetActive(true);
+          Cursor.lockState = CursorLockMode.Locked;
+          visible = false;
+          gameObject.GetComponent<PlayerMovement>().Resume();
+          gameObject.GetComponent<PlayerPickupObject>().Resume();
+        }
+        else{
+          //Show
+          inventoryUI.SetActive(true);
+          hud.SetActive(false);
+          Cursor.lockState = CursorLockMode.None;
+          visible = true;
+          gameObject.GetComponent<PlayerMovement>().Pause();
+          gameObject.GetComponent<PlayerPickupObject>().Pause();
+        }
+      }
+
       //Drop item
       if(Input.GetKeyDown(KeyCode.Q) && gameObjects.Count > 0){
         Drop(activeItemIndex);
