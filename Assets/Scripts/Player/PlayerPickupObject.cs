@@ -30,7 +30,6 @@ public class PlayerPickupObject : MonoBehaviour{
         if (Time.timeScale > 0)
         {
             if(Input.GetKeyDown(KeyCode.F) && grabbedObject != null){
-                Debug.Log("Releasing object");
                 ReleaseObject();
             }
             else if(Input.GetKeyDown(KeyCode.F)){
@@ -51,10 +50,7 @@ public class PlayerPickupObject : MonoBehaviour{
             }
 
             if(timeStartHoldingDownF > 0 && timeHeldDown > 0.2f){
-                Debug.Log("Time held down F key: " + timeHeldDown);
-
                 if(didHit || Physics.Raycast(camera.position, camera.forward, out hit, maxPickupDistance)){
-                  Debug.Log("Grabbing object!");
                   GrabObject();
                 }
 
@@ -63,7 +59,6 @@ public class PlayerPickupObject : MonoBehaviour{
 
             if (Input.GetMouseButtonDown(2) && grabbedObject != null)
             {
-                Debug.Log("Throwing object!");
                 ThrowObject();
             }
         }

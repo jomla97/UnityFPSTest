@@ -1,19 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Animations;
 
 public class Inventory : MonoBehaviour
 {
     public Transform activeItemPosition;
     public GameObject inventoryUI;
+    public GameObject inventoryUIGrid;
     public GameObject hud;
     public List<GameObject> gameObjects = new List<GameObject>();
     public int activeItemIndex = 0;
     public float dropForce = 10f;
     public float throwForce = 50f;
+    public int size = 20;
 
     private float timeStartHoldingDownF;
     private bool visible = false;
+
+    void Start(){
+      inventoryUI.SetActive(false);
+    }
 
     void Update(){
       //Show/hide inventory
@@ -38,6 +46,9 @@ public class Inventory : MonoBehaviour
         }
       }
 
+      //Update UI
+      UpdateUI();
+
       //Drop item
       if(Input.GetKeyDown(KeyCode.Q) && gameObjects.Count > 0){
         Drop(activeItemIndex);
@@ -60,6 +71,26 @@ public class Inventory : MonoBehaviour
       }
     }
 
+    void UpdateUI(){
+      if(visible){
+        int i = 0;
+        foreach(Transform slot in inventoryUIGrid.transform){
+          if(i >= gameObjects.Count && slot.childCount > 0){
+            foreach(Transform item in slot){
+              Destroy(item.gameObject);
+            }
+          }
+          else if(i < gameObjects.Count && slot.childCount == 0){
+            GameObject item = new GameObject("ItemIcon", typeof(RectTransform), typeof(Image));
+            item.transform.SetParent(slot);
+            item.GetComponent<Image>().color = new Color(255, 0, 0);
+          }
+
+          ++i;
+        }
+      }
+    }
+
     void UpdateActiveItem(){
       if(gameObjects.Count > activeItemIndex){
         GameObject gameObject = gameObjects[activeItemIndex];
@@ -78,17 +109,18 @@ public class Inventory : MonoBehaviour
     }
 
     public void PickUp(GameObject gameObject){
-      Debug.Log("Add object to inventory!");
-      gameObjects.Add(gameObject);
+      if(gameObjects.Count < size){
+        gameObjects.Add(gameObject);
 
-      if(gameObject.GetComponent<Rigidbody>()){
-        Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
-        rigidbody.freezeRotation = true;
-        rigidbody.useGravity = false;
-        rigidbody.detectCollisions = false;
+        if(gameObject.GetComponent<Rigidbody>()){
+          Rigidbody rigidbody = gameObject.GetComponent<Rigidbody>();
+          rigidbody.freezeRotation = true;
+          rigidbody.useGravity = false;
+          rigidbody.detectCollisions = false;
+        }
+
+        gameObject.SetActive(false);
       }
-
-      gameObject.SetActive(false);
     }
 
     public void Drop(int index){
